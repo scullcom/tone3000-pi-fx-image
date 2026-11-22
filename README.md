@@ -5,9 +5,19 @@ This project builds a 64-bit Raspberry Pi OS Trixie image that boots straight in
 ## Try a preview
 
 1. Open [Actions](https://github.com/scullcom/tone3000-pi-fx-image/actions/workflows/image.yml) and download the artifact from a successful build. Extract the artifact ZIP to get a file ending in `.img.xz` and its SHA-256 checksum. Preview builds should go on a spare card, ideally 16 GB or larger.
-2. In Raspberry Pi Imager, select **Raspberry Pi 5** and **Use custom**, then choose the `.img.xz` and the spare card. Imager erases the selected card. Use OS customisation to set your own maintenance username and password and, if needed, Wi-Fi and its country. Choose a username other than `tone-kiosk`, which the image reserves for the app. Ethernet also works for initial setup.
+2. In Raspberry Pi Imager, select **Raspberry Pi 5** and **Use custom**, then choose the `.img.xz` and the spare card. Imager erases the selected card. If OS customisation is offered, you can set Wi-Fi and create a maintenance account with a username other than `tone-kiosk`. If Imager skips customisation, use the first-boot Wi-Fi setup below or connect Ethernet.
 3. Connect a monitor, a USB audio interface and a keyboard, then boot. The kiosk should open TONE3000 FX full-screen. Use its audio settings to select the interface, input and output channels, sample rate and buffer size. Open **Clean Trem and Verb** from the preset list to try the signal chain.
 4. For online tones, choose **Sign in**. Scan the QR code with a phone, or visit **tone3000.com/activate** on a second device and type the displayed code. The Pi needs internet access during sign-in and when browsing online tones. Local effects and presets work offline.
+
+### Wi-Fi when Imager skips customisation
+
+Before the card's first boot, reinsert it into the Windows PC and look for the **bootfs** drive in File Explorer. Run the helper from this repository in PowerShell, replacing `D:` with the card's drive letter.
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\configure-wifi.ps1 -BootDrive D:
+```
+
+Enter the country code, network name, and Wi-Fi password at the prompts. The helper updates the `network-config` file on the card. Eject the card and boot the Pi. For the manual file format, see [Raspberry Pi's first-boot Wi-Fi example](https://www.raspberrypi.com/news/cloud-init-on-raspberry-pi-os/#networking-configuration-network-config).
 
 ## Saving and shutting down
 
@@ -15,7 +25,7 @@ The app checkpoints the working rig every 15 seconds. At a clean shutdown it sav
 
 Use a short press on the Pi 5 power button to shut down, or run `sudo poweroff` from your maintenance account. Allow the Pi to finish shutting down before disconnecting power.
 
-Press **Ctrl+Alt+F2** to log in to the maintenance console, where you can run `sudo nmtui` for network setup. Press **Ctrl+Alt+F7** to return to the kiosk. SSH starts disabled, and the kiosk account has a locked password and no sudo privileges by default.
+If you configured a maintenance account, press **Ctrl+Alt+F2** to log in to the maintenance console, where you can run `sudo nmtui` for network setup. Press **Ctrl+Alt+F7** to return to the kiosk. SSH starts disabled, and the kiosk account has a locked password and no sudo privileges by default.
 
 ## Build the image
 
