@@ -7,6 +7,8 @@ repo=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
   exit 1
 }
 [[ "$repo" != *[[:space:]]* ]] || { echo 'Use a checkout path without whitespace.' >&2; exit 1; }
+jobs=${T3K_IMAGE_JOBS:-2}
+[[ "$jobs" =~ ^[1-9][0-9]*$ ]] || { echo 'T3K_IMAGE_JOBS must be a positive integer.' >&2; exit 1; }
 cd "$repo"
 mkdir -p .build dist
 builder="$repo/.build/pi-gen"
@@ -32,6 +34,7 @@ COMPRESSION_LEVEL=3
 CLEAN=1
 STAGE_LIST='stage0 stage1 stage2 stage-kiosk'
 DEPLOY_DIR='$repo/dist'
+export T3K_IMAGE_JOBS=$jobs
 EOF
 cd "$builder"
 sudo ./build.sh -c kiosk-config

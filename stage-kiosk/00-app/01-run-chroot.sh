@@ -5,7 +5,7 @@ user=tone-kiosk
 home=/home/$user
 build=$(mktemp -d /var/tmp/tone3000-build.XXXXXX)
 trap 'rm -rf -- "$build" /var/tmp/tone3000-image' EXIT
-useradd --create-home --home-dir "$home" --shell /bin/bash --user-group "$user"
+useradd --create-home --home-dir "$home" --shell /bin/bash --user-group --groups audio,render "$user"
 passwd --lock root
 chmod 0700 "$home"
 chown "$user:$user" "$build"
@@ -14,7 +14,9 @@ test "$(stat -c '%u:%g' /etc/systemd/system/tone3000-kiosk-shutdown.service)" = 
 install -o "$user" -g "$user" -m 0644 /usr/share/tone3000-image/bash_profile "$home/.bash_profile"
 
 revision=7eac7f0d5cd2797f8b2a854547c61b235f64d1e6
-runuser -u "$user" -- bash -e -s -- "$build" "$revision" <<'APP_BUILD'
+runuser -u "$user" -- env -i HOME="$home" USER="$user" LOGNAME="$user" \
+  PATH=/usr/local/bin:/usr/bin:/bin T3K_PI_JOBS="${T3K_IMAGE_JOBS:-2}" \
+  bash -e -s -- "$build" "$revision" <<'APP_BUILD'
 cd "$1"
 git init --quiet
 git fetch --depth 1 https://github.com/scullcom/tone3000-pi-fx.git "$2"
