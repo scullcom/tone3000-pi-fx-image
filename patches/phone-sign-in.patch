@@ -1,0 +1,55 @@
+diff --git a/plugin/ui/NativeEditor.cpp b/plugin/ui/NativeEditor.cpp
+index 475bf93..7e5fb23 100644
+--- a/plugin/ui/NativeEditor.cpp
++++ b/plugin/ui/NativeEditor.cpp
+@@ -31,6 +31,10 @@ using Wrapper = juce::AudioProcessor::WrapperType;
+ Tone3000Session::Config sessionConfig(Wrapper wrapper) {
+   auto config = Tone3000Session::Config::fromBuild();
+   config.signInViaApp = design::kIos && wrapper == Wrapper::wrapperType_AudioUnitv3;
++#if JUCE_LINUX
++  config.preferDeviceCode = wrapper == Wrapper::wrapperType_Standalone &&
++                            juce::SystemStats::getEnvironmentVariable("T3K_KIOSK", {}) == "1";
++#endif
+   return config;
+ }
+ 
+diff --git a/plugin/ui/services/Tone3000Session.cpp b/plugin/ui/services/Tone3000Session.cpp
+index afe4819..229aa58 100644
+--- a/plugin/ui/services/Tone3000Session.cpp
++++ b/plugin/ui/services/Tone3000Session.cpp
+@@ -253,18 +253,15 @@ void Tone3000Session::login(LoginIntent intent) {
+     return;
+   }
+   lastIntent_ = intent;
+-  if (config_.signInViaApp) {
+-    // The app may have signed in since this editor last looked: then the
+-    // gated action simply goes ahead. Otherwise there is no browser to
+-    // send anywhere: the device code is the sign-in, the screen opens on
+-    // it, and the app's sign-in is watched for alongside.
+-    if (adoptAppSignIn()) return;
++  if (config_.signInViaApp || config_.preferDeviceCode) {
++    if (config_.signInViaApp && adoptAppSignIn()) return;
+     stopDeviceFlow();
+     flow_ = {};
+-    flow_.deviceOnly = true;
++    flow_.deviceOnly = config_.signInViaApp;
+     setFlow(AuthFlow::Phase::leaving);
+     startDeviceFlow();
+-    appSignInPoll_.start(kAppSignInPollMs, [this] { pollAppSignIn(); });
++    if (config_.signInViaApp)
++      appSignInPoll_.start(kAppSignInPollMs, [this] { pollAppSignIn(); });
+     return;
+   }
+   stopDeviceFlow();
+diff --git a/plugin/ui/services/Tone3000Session.h b/plugin/ui/services/Tone3000Session.h
+index 644afc5..4b35d2f 100644
+--- a/plugin/ui/services/Tone3000Session.h
++++ b/plugin/ui/services/Tone3000Session.h
+@@ -64,6 +64,7 @@ public:
+     // TONE3000 app, whose tokens arrive through the shared preferences (see
+     // the header comment). The iOS AUv3.
+     bool signInViaApp = false;
++    bool preferDeviceCode = false;
+     // Where the redirect listener binds. A test names an address no
+     // interface has, to play a machine whose loopback will not bind.
+     juce::String loopbackAddress = "127.0.0.1";

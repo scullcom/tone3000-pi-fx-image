@@ -1,0 +1,31 @@
+name: Build Pi 5 kiosk image
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install image builder dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            quilt parted qemu-user debootstrap zerofree zip dosfstools e2fsprogs \
+            libcap2-bin libarchive-tools rsync xz-utils curl xxd file git kmod bc gpg pigz arch-test
+      - name: Build and checksum the image
+        run: bash build-image.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tone3000-pi-fx-pi5-preview
+          path: |
+            dist/*.img.xz
+            dist/*.img.xz.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7

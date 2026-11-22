@@ -1,0 +1,13 @@
+[Unit]
+Description=Save the TONE3000 session before closing its display
+After=getty@tty7.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+RemainAfterExit=yes
+ExecStop=-/usr/bin/systemctl --user --machine=tone-kiosk@.host stop tone3000-kiosk.service
+TimeoutStopSec=25s
+
+[Install]
+WantedBy=multi-user.target

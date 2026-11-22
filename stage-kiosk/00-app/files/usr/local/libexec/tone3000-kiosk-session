@@ -1,0 +1,7 @@
+#!/bin/bash
+set -eu
+
+# XWayland is required by the fork's Linux JUCE editor.
+: "${DISPLAY:?No XWayland display}"
+systemctl --user import-environment DISPLAY WAYLAND_DISPLAY
+systemctl --user start tone3000-kiosk.service

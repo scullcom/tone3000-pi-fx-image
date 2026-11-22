@@ -1,0 +1,12 @@
+[Unit]
+Description=TONE3000 FX
+StartLimitIntervalSec=60s
+StartLimitBurst=5
+
+[Service]
+Environment=T3K_KIOSK=1
+ExecStart=%h/.local/bin/tone3000-pi-fx
+Restart=always
+RestartSec=2s
+TimeoutStopSec=15s
+UMask=0077

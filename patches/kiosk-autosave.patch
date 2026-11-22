@@ -1,0 +1,89 @@
+diff --git a/modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp b/modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp
+index 1a30851..5a2be63 100644
+--- a/modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp
++++ b/modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp
+@@ -59,11 +59,27 @@
+ 
+ #include <juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h>
+ 
++#if JUCE_LINUX
++ #include <csignal>
++#endif
++
+ namespace juce
+ {
+ 
++#if JUCE_LINUX
++namespace
++{
++volatile std::sig_atomic_t kioskStopRequested = 0;
++
++void requestKioskStop (int)
++{
++    kioskStopRequested = 1;
++}
++}
++#endif
++
+ //==============================================================================
+-class StandaloneFilterApp final : public JUCEApplication
++class StandaloneFilterApp final : public JUCEApplication, private Timer
+ {
+ public:
+     StandaloneFilterApp()
+@@ -143,10 +159,20 @@ public:
+         {
+             pluginHolder = createPluginHolder();
+         }
++
++       #if JUCE_LINUX
++        if (SystemStats::getEnvironmentVariable ("T3K_KIOSK", {}) == "1")
++        {
++            std::signal (SIGTERM, requestKioskStop);
++            lastKioskSave = Time::getMillisecondCounter();
++            startTimer (250);
++        }
++       #endif
+     }
+ 
+     void shutdown() override
+     {
++        stopTimer();
+         pluginHolder = nullptr;
+         mainWindow = nullptr;
+         appProperties.saveIfNeeded();
+@@ -180,6 +206,34 @@ protected:
+     std::unique_ptr<StandaloneFilterWindow> mainWindow;
+ 
+ private:
++    void timerCallback() override
++    {
++       #if JUCE_LINUX
++        auto* holder = mainWindow != nullptr ? mainWindow->getPluginHolder() : pluginHolder.get();
++        if (kioskStopRequested != 0)
++        {
++            stopTimer();
++            if (holder != nullptr)
++                holder->saveAudioDeviceState();
++
++            // Let the normal JUCE quit path save the rig and close any modal windows.
++            systemRequestedQuit();
++            return;
++        }
++
++        const auto now = Time::getMillisecondCounter();
++        if (holder != nullptr && now - lastKioskSave >= 15000)
++        {
++            lastKioskSave = now;
++            holder->savePluginState();
++            appProperties.saveIfNeeded();
++        }
++       #endif
++    }
++
++   #if JUCE_LINUX
++    uint32 lastKioskSave = 0;
++   #endif
+     std::unique_ptr<StandalonePluginHolder> pluginHolder;
+ };
+ 

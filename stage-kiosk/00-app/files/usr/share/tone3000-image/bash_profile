@@ -1,0 +1,4 @@
+if [[ "$(tty)" == /dev/tty7 ]]; then
+  export XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=labwc
+  exec labwc -C /usr/share/tone3000-image/labwc -s /usr/local/libexec/tone3000-kiosk-session
+fi
