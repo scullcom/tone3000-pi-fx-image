@@ -23,7 +23,7 @@ The GitHub **Build Pi 5 kiosk image** workflow runs on a native ARM64 Linux runn
 
 ```sh
 sudo apt-get update
-sudo apt-get install quilt parted qemu-user debootstrap zerofree zip dosfstools e2fsprogs \
+sudo apt-get install quilt parted qemu-user debootstrap debian-archive-keyring zerofree zip dosfstools e2fsprogs \
   libcap2-bin libarchive-tools rsync xz-utils curl xxd file git kmod bc gpg pigz arch-test
 bash build-image.sh
 ```

@@ -10,6 +10,7 @@ passwd --lock root
 chmod 0700 "$home"
 chown "$user:$user" "$build"
 chmod 0755 /usr/local/libexec/tone3000-kiosk-session
+test "$(stat -c '%u:%g' /etc/systemd/system/tone3000-kiosk-shutdown.service)" = 0:0
 install -o "$user" -g "$user" -m 0644 /usr/share/tone3000-image/bash_profile "$home/.bash_profile"
 
 revision=7eac7f0d5cd2797f8b2a854547c61b235f64d1e6
