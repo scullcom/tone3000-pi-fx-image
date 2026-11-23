@@ -1,4 +1,8 @@
 if [[ "$(tty)" == /dev/tty7 ]]; then
   export XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=labwc
+  if [[ -r /run/tone3000-kiosk-keyboard ]]; then
+    source /run/tone3000-kiosk-keyboard
+    export XKB_DEFAULT_LAYOUT="$XKBLAYOUT" XKB_DEFAULT_VARIANT="$XKBVARIANT"
+  fi
   exec labwc -C /usr/share/tone3000-image/labwc -s /usr/local/libexec/tone3000-kiosk-session
 fi

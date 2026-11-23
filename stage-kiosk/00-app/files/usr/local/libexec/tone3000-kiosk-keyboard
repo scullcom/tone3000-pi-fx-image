@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+
+# Treat the removable boot file as data. Never source it.
+mapfile -t choice < "$1"
+layout=${choice[0]:-}
+variant=${choice[1]:-}
+layout=${layout#$'\xef\xbb\xbf'}
+layout=${layout%$'\r'}
+variant=${variant%$'\r'}
+if (( ${#choice[@]} > 2 )) || [[ ! "$layout" =~ ^[a-z0-9_-]{1,32}$ ||
+      ! "$variant" =~ ^[A-Za-z0-9_-]{0,48}$ ]] ||
+    ! xkbcli compile-keymap --test --model pc105 --layout "$layout" --variant "$variant"; then
+  echo 'Invalid tone3000-keyboard.txt. Keeping the default keyboard layout.' >&2
+  exit 1
+fi
+
+printf 'XKBMODEL="pc105"\nXKBLAYOUT="%s"\nXKBVARIANT="%s"\nXKBOPTIONS=""\nBACKSPACE="guess"\n' \
+  "$layout" "$variant" > "$2"
+chmod 0644 "$2"

@@ -1,0 +1,11 @@
+[Unit]
+Description=Apply the keyboard layout selected on the TONE3000 boot partition
+RequiresMountsFor=/boot/firmware
+After=console-setup.service
+ConditionPathExists=/boot/firmware/tone3000-keyboard.txt
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/tone3000-kiosk-keyboard /boot/firmware/tone3000-keyboard.txt /run/tone3000-kiosk-keyboard
+ExecStartPost=/usr/bin/install -m 0644 /run/tone3000-kiosk-keyboard /etc/default/keyboard
+ExecStartPost=/usr/bin/setupcon --force --keyboard-only

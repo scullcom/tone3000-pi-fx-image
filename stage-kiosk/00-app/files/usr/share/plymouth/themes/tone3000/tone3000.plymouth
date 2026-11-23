@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=TONE3000
+Description=TONE3000 kiosk startup logo
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/tone3000
+ScriptFile=/usr/share/plymouth/themes/tone3000/tone3000.script
