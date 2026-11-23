@@ -2,6 +2,8 @@
 
 This project builds a 64-bit Raspberry Pi OS Trixie image that boots straight into the TONE3000 FX standalone app. It includes Guitarix LV2 effects and pedal artwork, plus the **Clean Trem and Verb** factory preset. The desktop version and its installer are available from the [TONE3000 FX app repo](https://github.com/scullcom/tone3000-pi-fx).
 
+The image uses TONE3000 FX **v1.3.0**, including USB preset import and export. [App release notes](https://github.com/scullcom/tone3000-pi-fx/releases/tag/v1.3.0)
+
 ## Try a preview
 
 1. Open [Actions](https://github.com/scullcom/tone3000-pi-fx-image/actions/workflows/image.yml) and download the artifact from a successful build. Extract the artifact ZIP to get a file ending in `.img.xz` and its SHA-256 checksum. Preview builds should go on a spare card, ideally 16 GB or larger.
@@ -37,6 +39,12 @@ Open the Settings and Login menu in TONE3000, select **Shut down Pi…**, and co
 
 If you configured a maintenance account, press **Ctrl+Alt+F2** to log in to the maintenance console, where you can run `sudo nmtui` for network setup. Press **Ctrl+Alt+F7** to return to the kiosk. SSH starts disabled, and the kiosk account has a locked password and no sudo privileges by default.
 
+## Move presets between cards
+
+To migrate user presets to this image, use **Export** in the Settings and Login menu of TONE3000 FX v1.3.0. Select the banks and presets you want to keep. The app writes them to `/Tone3000-pi-fx/presets` on the USB drive and replaces any previous backup in that folder.
+
+Boot this kiosk image, open the same menu, and choose **Import**. Insert the USB drive and select what to restore. Banks with matching names are merged and matching presets within those banks are overwritten. This backup transfers user presets and banks. Set up your audio interface and TONE3000 sign-in separately on the new card.
+
 ## Build the image
 
 The GitHub **Build Pi 5 kiosk image** workflow runs on a native ARM64 Linux runner and produces an image and checksum. On a 64-bit ARM Debian-family build machine with a Linux filesystem, at least 20 GB free is a practical starting point. Install the pi-gen dependencies and run:
@@ -53,6 +61,7 @@ Find the compressed image and checksum in `dist/`. The build uses an official [p
 ## Preview verification
 
 - Boot a fresh card with a USB interface. Confirm the logo appears without setup prompts, the app fills the display, and its settings remain accessible. Repeat with a layout chosen through `configure-keyboard.ps1` and verify layout-specific keys.
+- From the Settings and Login menu, export a test bank to a USB drive and import it again. Confirm the kiosk mounts the drive without a password prompt and replaces matching presets in the correct bank.
 - Sign in on a phone. Approve the login and check online browsing in the app. Reboot and confirm the account is still signed in.
 - Open **Clean Trem and Verb** and adjust the tremolo or reverb. Open **Shut down Pi…** and cancel once, then confirm a second time. Boot and check the changed value, preset file, interface, channels and buffer size. Also verify shutdown using the physical power button.
 - Listen at your intended buffer size through at least one autosave. Boot again with networking disconnected to check offline playback.

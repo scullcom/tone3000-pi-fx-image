@@ -2,4 +2,4 @@ ca-certificates git build-essential cmake ninja-build pkg-config python3 sudo
 zenity libgtk-3-dev libasound2-dev libjack-jackd2-dev libcurl4-openssl-dev libfreetype-dev
 libx11-dev libxcomposite-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxrender-dev
 guitarix-lv2 labwc xwayland dbus-user-session libpam-systemd fonts-dejavu-core kbd
-polkitd libxkbcommon-tools plymouth plymouth-themes rpi-splash-screen-support librsvg2-bin python3-pil
+polkitd udisks2 libxkbcommon-tools plymouth plymouth-themes rpi-splash-screen-support librsvg2-bin python3-pil

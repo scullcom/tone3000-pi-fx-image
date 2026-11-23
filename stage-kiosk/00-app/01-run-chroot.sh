@@ -16,7 +16,7 @@ chmod 0755 /usr/local/libexec/tone3000-kiosk-session /usr/local/libexec/tone3000
 test "$(stat -c '%u:%g' /etc/systemd/system/tone3000-kiosk-shutdown.service)" = 0:0
 install -o "$user" -g "$user" -m 0644 /usr/share/tone3000-image/bash_profile "$home/.bash_profile"
 
-revision=523bbec7c35a15dd40f032ab6c9bf1bcce8f5b87
+revision=933409c4dbccd4807949a69d7a6ff8cea7597445 # TONE3000 FX v1.3.0
 runuser -u "$user" -- env -i HOME="$home" USER="$user" LOGNAME="$user" \
   PATH=/usr/local/bin:/usr/bin:/bin T3K_PI_JOBS="${T3K_IMAGE_JOBS:-2}" \
   bash -e -s -- "$build" "$revision" <<'APP_BUILD'
@@ -34,6 +34,11 @@ T3K_PI_BUILD_DIR="$PWD/build" bash install.sh --with-guitarix
 # The desktop installer treats a partial artwork download as recoverable.
 python3 script/install-guitarix-artwork.py "$HOME/.config/tone3000-pi-fx/TONE3000"
 APP_BUILD
+
+# The kiosk runs as a regular user. Install the pinned app's removable-USB mount policy.
+command -v udisksctl >/dev/null
+install -D -o root -g root -m 0644 "$build/resources/kiosk/49-tone3000-preset-usb.rules" \
+  /etc/polkit-1/rules.d/49-tone3000-preset-usb.rules
 
 theme=/usr/share/plymouth/themes/tone3000
 rsvg-convert --width=420 --keep-aspect-ratio --output="$theme/logo.png" "$build/plugin/ui/assets/t3k.svg"
